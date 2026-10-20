@@ -43,6 +43,11 @@ the official source before real compliance use.
 - **GHG defaults** are indicative RED-style values, not CORSIA/RED III certified numbers.
 - Fraud heuristics (fresh-oil TPC floor, recoverable fraction) are analytical choices, not regulation.
 
+## Demos
+
+* **Interactive demo (Lovable, mock data):** [editor](https://lovable.dev/projects/286329ce-3fce-4673-b440-fab690ef6b1f) / [preview](https://id-preview--286329ce-3fce-4673-b440-fab690ef6b1f.lovable.app) -- front-end only; includes a live SHA-256 ledger you can tamper with. *Currently private to the owner's workspace; not yet published.*
+* **Narrated walkthrough (2m33s):** https://youtu.be/mVYgWein8Xo -- real captured output from the running API and test suite. *Currently a private upload; it will be made public after review.*
+
 ## Benchmarks and references
 
 * [docs/PLATFORM_REVIEW.md](docs/PLATFORM_REVIEW.md) -- CPCB EPR portal, FSSAI RUCO, Veriflux, Recycle Ledger, Bioledger: what was borrowed, what is missing.
