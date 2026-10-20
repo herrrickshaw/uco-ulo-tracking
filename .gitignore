@@ -1,0 +1,11 @@
+backend/.venv/
+backend/uco_ulo.db
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+.pytest_cache/
+
+frontend/node_modules/
+frontend/dist/
+
+.DS_Store

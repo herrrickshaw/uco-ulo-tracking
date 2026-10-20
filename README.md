@@ -1,0 +1,56 @@
+# UCO / ULO Tracking
+
+Chain-of-custody and compliance tracking for **Used Cooking Oil (UCO)** and **Used Lubricating Oil (ULO)** in India.
+Sister project to [saf-monitoring-system](https://github.com/herrrickshaw/saf-monitoring-system) and built on the same
+stack (FastAPI + SQLite, React/Vite/Tailwind, mock-data seeding). UCO is a feedstock for biodiesel and SAF (HEFA);
+ULO is a hazardous waste that is re-refined into base oil.
+
+```
+generator -> collection (manifest) -> aggregator lot -> processing batch -> dispatch
+ (restaurant / garage)   TPC, water, PCB     mass balance     yield check     buyer
+```
+
+## What it does
+
+| Area | UCO | ULO |
+|---|---|---|
+| Source registry | FBOs with FSSAI licence, declared monthly oil purchase | Garages/industry with CPCB authorisation |
+| Collection record | manifest no., litres, TPC %, FFA % | manifest no., litres, water %, PCB ppm, chlorine ppm |
+| Lot mass balance | kg received vs kg processed per lot | same |
+| Processing | biodiesel / pretreated HEFA feedstock, yield-range check | base oil / fuel oil, yield-range check |
+| Compliance | FSSAI RUCO context, indicative GHG saving vs fossil diesel | Used-oil EPR: producer obligation vs certificates bought, recycler supply |
+
+### Integrity checks (`backend/app/calculations/integrity.py`)
+Heuristic fraud/data-quality flags. A flag is a prompt to investigate, not a finding.
+`suspiciously_fresh_uco` (TPC far below used-oil range, the classic UCO-fraud signature), `generator_over_capacity`
+(collected more than the generator could plausibly return given declared purchases), `duplicate_manifest`,
+`collector_registration` (missing/expired), `mass_balance`, `implausible_yield`, `product_mismatch`,
+`dispatch_exceeds_output`, `pcb_hazard_segregate`, `high_water`, `high_chlorine`.
+
+## Regulatory disclaimer
+
+Every threshold lives in `backend/app/calculations/constants.py` as an **editable default, not hardcoded truth**
+(also served at `GET /api/compliance/parameters`). Values marked VERIFY or PLACEHOLDER there must be reconciled with
+the official source before real compliance use.
+
+- **FSSAI**: 25% TPC ceiling for frying oil (FSS Licensing & Registration First Amendment 2017); RUCO traceability
+  application; >50 L/day record-keeping comes from a May 2019 order known only via a press notice -- check the original.
+- **Used-oil EPR**: Hazardous and Other Wastes (Management and Transboundary Movement) Second Amendment Rules 2023,
+  G.S.R. 677(E), effective 1 Apr 2024. Only the endpoints (5% FY2024-25, 50% FY2030-31) are sourced; **intermediate
+  years are a linear assumption** -- replace with the Schedule values.
+- **GHG defaults** are indicative RED-style values, not CORSIA/RED III certified numbers.
+- Fraud heuristics (fresh-oil TPC floor, recoverable fraction) are analytical choices, not regulation.
+
+## Run
+
+```bash
+./run_app.sh            # backend :8000 (docs at /docs), frontend :5173
+cd backend && source .venv/bin/activate && pytest
+```
+
+First start seeds six months of mock data for 8 generators, 7 collectors/processors, 12 lots and 12 batches with
+anomalies planted deliberately so each check has something to show, plus two EPR producers (one compliant, one short).
+
+## Not built yet
+Real RUCO/CPCB portal ingestion (no public API found), authentication, audit trail, ISCC/mass-balance certificate
+import, PDF/Excel reports (the SAF repo has these), India CCTS module.
