@@ -4,11 +4,13 @@ import Compliance from "./pages/Compliance";
 import Dashboard from "./pages/Dashboard";
 import Integrity from "./pages/Integrity";
 import Lots from "./pages/Lots";
+import Shipments from "./pages/Shipments";
 
 const VIEWS = [
   { key: "dashboard", label: "Dashboard", component: Dashboard },
   { key: "collections", label: "Collections", component: Collections },
   { key: "lots", label: "Lots & Processing", component: Lots },
+  { key: "shipments", label: "Shipments", component: Shipments },
   { key: "integrity", label: "Integrity Flags", component: Integrity },
   { key: "compliance", label: "EPR & GHG", component: Compliance },
 ];

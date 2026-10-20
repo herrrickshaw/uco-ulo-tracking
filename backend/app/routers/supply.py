@@ -5,10 +5,11 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from ..calculations import constants as c
+from ..calculations import ledger
 from ..calculations.mass_balance import lot_balance
 from ..calculations.quality import litres_to_kg
 from ..db import get_db
-from ..models import Collection, Collector, Dispatch, Generator, Lot, ProcessingBatch
+from ..models import Collection, Collector, Dispatch, Generator, Lot, ProcessingBatch, Shipment
 
 router = APIRouter(prefix="/api", tags=["supply-chain"])
 
@@ -32,6 +33,9 @@ class CollectorOut(BaseModel):
     material: str
     registration_ref: str
     registration_valid_until: date | None
+    state: str
+    ca_level: int | None
+    has_storage: bool
 
 
 class CollectionIn(BaseModel):
@@ -47,6 +51,8 @@ class CollectionIn(BaseModel):
     water_pct: float | None = None
     pcb_ppm: float | None = None
     chlorine_ppm: float | None = None
+    ruco_request_id: str = ""
+    evidence_ref: str = ""
 
 
 class CollectionOut(CollectionIn):
@@ -62,6 +68,7 @@ class BatchIn(BaseModel):
     product: str
     input_kg: float
     output_kg: float
+    unfit_declaration_ref: str = ""
 
 
 class BatchOut(BatchIn):
@@ -77,6 +84,29 @@ class DispatchIn(BaseModel):
 
 
 class DispatchOut(DispatchIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+class ShipmentIn(BaseModel):
+    manifest_no: str
+    material: str
+    sender_id: int
+    receiver_id: int
+    lot_id: int | None = None
+    vehicle_no: str
+    gps_tracked: bool = True
+    nhwts_registered: bool = True
+    spcb_intimated: bool = True
+    max_container_l: float = 200.0
+    distance_km: float = 0.0
+    dispatched_on: date
+    received_on: date | None = None
+    dispatched_kg: float
+    received_kg: float | None = None
+
+
+class ShipmentOut(ShipmentIn):
     model_config = ConfigDict(from_attributes=True)
     id: int
 
@@ -109,6 +139,7 @@ def create_collection(payload: CollectionIn, db: Session = Depends(get_db)):
     db.add(row)
     db.commit()
     db.refresh(row)
+    ledger.append(db, "collection", row)
     return row
 
 
@@ -140,6 +171,7 @@ def create_batch(payload: BatchIn, db: Session = Depends(get_db)):
     db.add(row)
     db.commit()
     db.refresh(row)
+    ledger.append(db, "batch", row)
     return row
 
 
@@ -156,4 +188,22 @@ def create_dispatch(payload: DispatchIn, db: Session = Depends(get_db)):
     db.add(row)
     db.commit()
     db.refresh(row)
+    ledger.append(db, "dispatch", row)
+    return row
+
+
+@router.get("/shipments", response_model=list[ShipmentOut])
+def list_shipments(db: Session = Depends(get_db)):
+    return db.query(Shipment).order_by(Shipment.dispatched_on.desc()).all()
+
+
+@router.post("/shipments", response_model=ShipmentOut)
+def create_shipment(payload: ShipmentIn, db: Session = Depends(get_db)):
+    if not db.get(Collector, payload.sender_id) or not db.get(Collector, payload.receiver_id):
+        raise HTTPException(404, "Sender or receiver not found")
+    row = Shipment(**payload.model_dump())
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    ledger.append(db, "shipment", row)
     return row

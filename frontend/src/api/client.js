@@ -22,3 +22,7 @@ export const fetchIntegrity = () => apiFetch("/compliance/integrity");
 export const fetchEPR = () => apiFetch("/compliance/epr");
 export const fetchRecyclerSupply = () => apiFetch("/compliance/epr/recycler-supply");
 export const fetchGHG = () => apiFetch("/compliance/ghg");
+export const fetchShipments = () => apiFetch("/shipments");
+export const fetchCertificateLedger = () => apiFetch("/compliance/epr/certificates");
+export const fetchReturns = () => apiFetch("/compliance/returns");
+export const fetchLedger = () => apiFetch("/compliance/ledger");

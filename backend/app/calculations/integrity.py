@@ -6,7 +6,7 @@ from .mass_balance import lot_balance, yield_ok
 from .quality import litres_to_kg, registration_valid, uco_quality_flags, ulo_quality_flags
 
 
-def run_checks(collections, lots, batches, dispatches) -> list[dict]:
+def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dict]:
     flags: list[dict] = []
 
     def add(kind, ref, detail, severity="high"):
@@ -52,7 +52,35 @@ def run_checks(collections, lots, batches, dispatches) -> list[dict]:
             add("product_mismatch", ref, f"{b.product} is not a valid product of {b.lot.material}")
         elif not yield_ok(b.product, b.input_kg, b.output_kg):
             add("implausible_yield", ref, f"{b.output_kg / b.input_kg:.0%} yield outside {c.YIELD_RANGE[b.product]}")
+        if b.product == "fuel_oil" and not b.unfit_declaration_ref:
+            add("coprocessing_without_declaration", ref, "co-processing needs a declaration that the oil is unfit for re-refining")
         out = sum(d.quantity_kg for d in b.dispatches)
         if out > b.output_kg * (1 + c.MASS_BALANCE_TOLERANCE_PCT / 100):
             add("dispatch_exceeds_output", ref, f"dispatched {out:.0f} kg > produced {b.output_kg:.0f} kg")
+
+    for sh in shipments:
+        ref = f"shipment {sh.manifest_no}"
+        if sh.material == "ULO":
+            if not sh.nhwts_registered:
+                add("vehicle_not_in_nhwts", ref, f"vehicle {sh.vehicle_no} not registered in the hazardous-waste tracking system")
+            if not sh.gps_tracked:
+                add("vehicle_no_gps", ref, f"vehicle {sh.vehicle_no} not GPS-tracked (required for used-oil transport)")
+            if not sh.spcb_intimated:
+                add("spcb_not_intimated", ref, "sender did not intimate the State Pollution Control Board", "medium")
+        if not registration_valid(sh.receiver.registration_valid_until, sh.dispatched_on):
+            add("receiver_registration", ref, f"{sh.receiver.name} registration missing/expired on {sh.dispatched_on}")
+        if sh.received_kg is not None and sh.dispatched_kg > 0:
+            var = abs(sh.received_kg - sh.dispatched_kg) / sh.dispatched_kg * 100
+            if var > c.TRANSIT_LOSS_TOLERANCE_PCT:
+                add("transit_variance", ref, f"received {sh.received_kg:.0f} kg vs dispatched {sh.dispatched_kg:.0f} kg ({var:.1f}% off)")
+        s = sh.sender
+        if sh.material == "ULO" and s.ca_level == 1:
+            if s.has_storage:
+                add("ca1_has_storage", ref, f"{s.name} is registered CA-1 (no storage) but holds storage")
+            if sh.max_container_l > c.CA1_MAX_CONTAINER_L:
+                add("ca1_container_too_large", ref, f"CA-1 container {sh.max_container_l:.0f} L > {c.CA1_MAX_CONTAINER_L:.0f} L")
+            if sh.distance_km > c.CA1_RADIUS_NO_RECYCLER_KM:
+                add("ca1_out_of_radius", ref, f"CA-1 haul {sh.distance_km:.0f} km exceeds even the {c.CA1_RADIUS_NO_RECYCLER_KM:.0f} km no-recycler limit")
+            elif sh.distance_km > c.CA1_RADIUS_KM:
+                add("ca1_out_of_radius", ref, f"CA-1 haul {sh.distance_km:.0f} km > {c.CA1_RADIUS_KM:.0f} km (allowed only if no recycler/CA-2 nearby)", "medium")
     return flags

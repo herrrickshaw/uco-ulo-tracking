@@ -35,11 +35,22 @@ the official source before real compliance use.
 
 - **FSSAI**: 25% TPC ceiling for frying oil (FSS Licensing & Registration First Amendment 2017); RUCO traceability
   application; >50 L/day record-keeping comes from a May 2019 order known only via a press notice -- check the original.
-- **Used-oil EPR**: Hazardous and Other Wastes (Management and Transboundary Movement) Second Amendment Rules 2023,
-  G.S.R. 677(E), effective 1 Apr 2024. Only the endpoints (5% FY2024-25, 50% FY2030-31) are sourced; **intermediate
-  years are a linear assumption** -- replace with the Schedule values.
+- **Used-oil EPR**: HOWM Second Amendment Rules 2023, G.S.R. 677(E), effective 1 Apr 2024, as reproduced in CPCB's
+  Used Oil FAQ: producer target = 5/10/20/20/40/40% (FY2024-25 to 2029-30), 50% from 2030-31, each of sales/imports two
+  years earlier (Y-2); used-oil importers 100% of Y-1 imports. Certificates `QEPR = Qp x CF x Wp` (Wp 1.0 re-refining,
+  0.25 co-processing; CF is set per recycler by CPCB -- our default is a placeholder), valid two years after the FY end,
+  purchase cap = liability + 10%, not tradable between producers. EC (Environmental Compensation) INR/t is not captured.
 - **GHG defaults** are indicative RED-style values, not CORSIA/RED III certified numbers.
 - Fraud heuristics (fresh-oil TPC floor, recoverable fraction) are analytical choices, not regulation.
+
+## Benchmarks and references
+
+* [docs/PLATFORM_REVIEW.md](docs/PLATFORM_REVIEW.md) -- CPCB EPR portal, FSSAI RUCO, Veriflux, Recycle Ledger, Bioledger: what was borrowed, what is missing.
+* [docs/QUALITY_REQUIREMENTS.md](docs/QUALITY_REQUIREMENTS.md) -- UCO / ULO quality requirements across countries, with confidence tags.
+
+New in v0.2: shipments with Form 10 / GPS / NHWTS / CA-1 checks, EPR certificate ledger and transfer rules, return-filing
+tracker, and a SHA-256 hash-chained custody ledger (`GET /api/compliance/ledger`) that detects edits to logged records.
+The ledger is tamper-*evident* on one node; anchor the head hash externally for stronger guarantees.
 
 ## Run
 
@@ -48,9 +59,8 @@ the official source before real compliance use.
 cd backend && source .venv/bin/activate && pytest
 ```
 
-First start seeds six months of mock data for 8 generators, 7 collectors/processors, 12 lots and 12 batches with
+First start seeds six months of mock data for 8 generators, 7 collectors/processors, 12 lots, 12 batches and 14 shipments with
 anomalies planted deliberately so each check has something to show, plus two EPR producers (one compliant, one short).
 
 ## Not built yet
-Real RUCO/CPCB portal ingestion (no public API found), authentication, audit trail, ISCC/mass-balance certificate
-import, PDF/Excel reports (the SAF repo has these), India CCTS module.
+See the end of docs/PLATFORM_REVIEW.md.

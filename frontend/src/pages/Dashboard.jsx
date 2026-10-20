@@ -17,6 +17,12 @@ export default function Dashboard() {
         sublabel={`${s.integrity_flags_high} high severity`}
         tone={s.integrity_flags_high ? "bad" : "good"}
       />
+      <KpiCard
+        label="Custody ledger"
+        value={s.ledger_intact ? "Intact" : "TAMPERED"}
+        sublabel={`${s.ledger_entries} hash-chained entries`}
+        tone={s.ledger_intact ? "good" : "bad"}
+      />
       {Object.entries(s.output_tonnes_by_product).map(([k, v]) => (
         <KpiCard key={k} label={`Output: ${k.replace("_", " ")}`} value={`${v} t`} />
       ))}
