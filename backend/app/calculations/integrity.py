@@ -1,20 +1,25 @@
 """Fraud / data-integrity checks.  Pure functions over ORM rows so they are unit-testable."""
+from __future__ import annotations
+
 from collections import Counter, defaultdict
+from functools import partial
 
 from . import constants as c
-from .mass_balance import lot_balance, yield_ok
-from .quality import litres_to_kg, registration_valid, uco_quality_flags, ulo_quality_flags
+from .mass_balance import lot_balance, lot_totals, yield_ok
+from .quality import registration_valid, uco_quality_flags, ulo_quality_flags
+
+Flags = list[dict]
 
 
-def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dict]:
-    flags: list[dict] = []
+def _flag(flags: Flags, kind: str, ref: str, detail: str, severity: str = "high") -> None:
+    flags.append({"check": kind, "ref": ref, "detail": detail, "severity": severity})
 
-    def add(kind, ref, detail, severity="high"):
-        flags.append({"check": kind, "ref": ref, "detail": detail, "severity": severity})
 
+def _check_collections(flags: Flags, collections) -> dict:
+    """Per-collection checks (manifest, registration, quality). Returns litres collected per (generator, year, month)."""
+    add = partial(_flag, flags)
     manifest_counts = Counter(col.manifest_no for col in collections)
     monthly: dict[tuple, float] = defaultdict(float)
-
     for col in collections:
         ref = f"collection {col.manifest_no}"
         if manifest_counts[col.manifest_no] > 1:
@@ -31,21 +36,31 @@ def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dic
             for q in ulo_quality_flags(col.water_pct, col.pcb_ppm, col.chlorine_ppm):
                 add(q, ref, "ULO acceptance threshold exceeded", "medium" if q != "pcb_hazard_segregate" else "high")
         monthly[(col.generator_id, col.collected_on.year, col.collected_on.month)] += col.quantity_litres
+    return monthly
 
+
+def _check_generator_capacity(flags: Flags, collections, monthly: dict) -> None:
+    """Flag generators whose monthly collections exceed what their declared purchases could yield."""
     gens = {col.generator_id: col.generator for col in collections}
     for (gid, y, m), litres in monthly.items():
         g = gens[gid]
         cap = g.monthly_purchase_litres * c.MAX_RECOVERABLE_FRACTION[g.material]
         if litres > cap:
-            add("generator_over_capacity", f"{g.name} {y}-{m:02d}",
-                f"{litres:.0f} L collected vs plausible max {cap:.0f} L from declared purchases")
+            _flag(flags, "generator_over_capacity", f"{g.name} {y}-{m:02d}",
+                  f"{litres:.0f} L collected vs plausible max {cap:.0f} L from declared purchases")
 
+
+def _check_lots(flags: Flags, lots) -> None:
+    """Flag lots where more was processed than received."""
     for lot in lots:
-        received = sum(litres_to_kg(lot.material, col.quantity_litres) for col in lot.collections)
-        processed = sum(b.input_kg for b in lot.batches)
+        received, processed = lot_totals(lot)
         if not lot_balance(received, processed)["balanced"]:
-            add("mass_balance", f"lot {lot.lot_code}", f"processed {processed:.0f} kg > received {received:.0f} kg")
+            _flag(flags, "mass_balance", f"lot {lot.lot_code}", f"processed {processed:.0f} kg > received {received:.0f} kg")
 
+
+def _check_batches(flags: Flags, batches) -> None:
+    """Product validity, yield range, co-processing declaration and dispatch-vs-output checks."""
+    add = partial(_flag, flags)
     for b in batches:
         ref = f"batch {b.batch_code}"
         if b.product not in c.PRODUCTS_BY_MATERIAL[b.lot.material]:
@@ -58,6 +73,10 @@ def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dic
         if out > b.output_kg * (1 + c.MASS_BALANCE_TOLERANCE_PCT / 100):
             add("dispatch_exceeds_output", ref, f"dispatched {out:.0f} kg > produced {b.output_kg:.0f} kg")
 
+
+def _check_shipments(flags: Flags, shipments) -> None:
+    """Transport, registration, transit-loss and CA-1 collection-agent rules."""
+    add = partial(_flag, flags)
     for sh in shipments:
         ref = f"shipment {sh.manifest_no}"
         if sh.material == "ULO":
@@ -83,4 +102,17 @@ def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dic
                 add("ca1_out_of_radius", ref, f"CA-1 haul {sh.distance_km:.0f} km exceeds even the {c.CA1_RADIUS_NO_RECYCLER_KM:.0f} km no-recycler limit")
             elif sh.distance_km > c.CA1_RADIUS_KM:
                 add("ca1_out_of_radius", ref, f"CA-1 haul {sh.distance_km:.0f} km > {c.CA1_RADIUS_KM:.0f} km (allowed only if no recycler/CA-2 nearby)", "medium")
+
+
+def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dict]:
+    """Run every integrity check over ORM rows; returns flag dicts {check, ref, detail, severity}.
+
+    ``dispatches`` is accepted for API compatibility; dispatch totals are read via ``batch.dispatches``.
+    """
+    flags: Flags = []
+    monthly = _check_collections(flags, collections)
+    _check_generator_capacity(flags, collections, monthly)
+    _check_lots(flags, lots)
+    _check_batches(flags, batches)
+    _check_shipments(flags, shipments)
     return flags
