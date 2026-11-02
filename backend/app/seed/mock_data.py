@@ -12,8 +12,19 @@ from ..calculations import ledger
 from ..calculations.epr import certificate_tonnes, fy_start_year
 from ..calculations.quality import litres_to_kg
 from ..calculations.returns import annual_due, quarter_due
-from ..models import (Collection, Collector, Dispatch, EPRCertificate, EPRProducer, EPRPurchase, Generator,
-                      Lot, ProcessingBatch, ReturnFiling, Shipment)
+from ..models import (
+    Collection,
+    Collector,
+    Dispatch,
+    EPRCertificate,
+    EPRProducer,
+    EPRPurchase,
+    Generator,
+    Lot,
+    ProcessingBatch,
+    ReturnFiling,
+    Shipment,
+)
 
 TODAY = date(2026, 10, 20)
 

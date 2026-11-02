@@ -1,11 +1,11 @@
 from datetime import date
 
 from app.calculations.epr import certificate_expiry, certificate_tonnes, fy_start_year, obligation, price_band, target_pct
-from app.calculations.returns import annual_due, quarter_due
-from app.calculations.returns import status as return_status
 from app.calculations.ghg import ghg_savings
 from app.calculations.mass_balance import lot_balance, yield_ok
 from app.calculations.quality import uco_quality_flags, ulo_quality_flags
+from app.calculations.returns import annual_due, quarter_due
+from app.calculations.returns import status as return_status
 
 
 def test_fresh_uco_flagged():
