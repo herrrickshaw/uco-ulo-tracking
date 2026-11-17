@@ -51,7 +51,9 @@ def run_checks(collections, lots, batches, dispatches, shipments=()) -> list[dic
         if b.product not in c.PRODUCTS_BY_MATERIAL[b.lot.material]:
             add("product_mismatch", ref, f"{b.product} is not a valid product of {b.lot.material}")
         elif not yield_ok(b.product, b.input_kg, b.output_kg):
-            add("implausible_yield", ref, f"{b.output_kg / b.input_kg:.0%} yield outside {c.YIELD_RANGE[b.product]}")
+            detail = (f"{b.output_kg / b.input_kg:.0%} yield outside {c.YIELD_RANGE[b.product]}"
+                      if b.input_kg > 0 else f"non-positive input {b.input_kg} kg recorded")
+            add("implausible_yield", ref, detail)
         if b.product == "fuel_oil" and not b.unfit_declaration_ref:
             add("coprocessing_without_declaration", ref, "co-processing needs a declaration that the oil is unfit for re-refining")
         out = sum(d.quantity_kg for d in b.dispatches)
