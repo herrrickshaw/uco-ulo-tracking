@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 
 from ..calculations import constants as c
 from ..calculations import ledger
-from ..calculations.mass_balance import lot_balance
-from ..calculations.quality import litres_to_kg
+from ..calculations.mass_balance import lot_balance, lot_totals
 from ..db import get_db
 from ..models import Collection, Collector, Dispatch, Generator, Lot, ProcessingBatch, Shipment
 
@@ -147,8 +146,7 @@ def create_collection(payload: CollectionIn, db: Session = Depends(get_db)):
 def list_lots(db: Session = Depends(get_db)):
     out = []
     for lot in db.query(Lot).order_by(Lot.formed_on.desc()).all():
-        received = sum(litres_to_kg(lot.material, col.quantity_litres) for col in lot.collections)
-        processed = sum(b.input_kg for b in lot.batches)
+        received, processed = lot_totals(lot)
         out.append({"id": lot.id, "lot_code": lot.lot_code, "material": lot.material,
                     "aggregator": lot.aggregator.name, "formed_on": lot.formed_on,
                     "n_collections": len(lot.collections), **lot_balance(received, processed)})

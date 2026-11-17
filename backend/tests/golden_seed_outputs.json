@@ -1,0 +1,317 @@
+{
+ "/api/compliance/epr": [
+  {
+   "basis": "producer",
+   "basis_fy": "2024-25",
+   "basis_tonnes": 78.4,
+   "certificates_tonnes": 16.3,
+   "compliant": true,
+   "fy": "2026-27",
+   "max_purchasable_tonnes": 17.25,
+   "over_purchased": false,
+   "producer": "Meridian Lubricants",
+   "producer_type": "P3",
+   "required_tonnes": 15.68,
+   "shortfall_tonnes": 0.0,
+   "target_pct": 20.0
+  },
+  {
+   "basis": "producer",
+   "basis_fy": "2024-25",
+   "basis_tonnes": 125.4,
+   "certificates_tonnes": 9.4,
+   "compliant": false,
+   "fy": "2026-27",
+   "max_purchasable_tonnes": 27.59,
+   "over_purchased": false,
+   "producer": "Coastal Base Oils",
+   "producer_type": "P1",
+   "required_tonnes": 25.08,
+   "shortfall_tonnes": 15.68,
+   "target_pct": 20.0
+  }
+ ],
+ "/api/compliance/epr/certificates": [
+  {
+   "available_mt": 5.641,
+   "generated_mt": 31.342,
+   "recycler": "ReBase Re-refinery",
+   "state": "Gujarat",
+   "transferred_mt": 25.701
+  }
+ ],
+ "/api/compliance/integrity": [
+  {
+   "check": "duplicate_manifest",
+   "detail": "manifest number used on more than one collection",
+   "ref": "collection M00001",
+   "severity": "high"
+  },
+  {
+   "check": "suspiciously_fresh_uco",
+   "detail": "TPC 3.1% < 8.0% -- possible fresh/blended oil",
+   "ref": "collection M90001",
+   "severity": "high"
+  },
+  {
+   "check": "collector_registration",
+   "detail": "Lapsed Pickup Co registration missing/expired on 2026-09-10",
+   "ref": "collection M90003",
+   "severity": "high"
+  },
+  {
+   "check": "duplicate_manifest",
+   "detail": "manifest number used on more than one collection",
+   "ref": "collection M00001",
+   "severity": "high"
+  },
+  {
+   "check": "pcb_hazard_segregate",
+   "detail": "ULO acceptance threshold exceeded",
+   "ref": "collection M90004",
+   "severity": "high"
+  },
+  {
+   "check": "generator_over_capacity",
+   "detail": "1600 L collected vs plausible max 900 L from declared purchases",
+   "ref": "Spice Route Restaurant 2026-09",
+   "severity": "high"
+  },
+  {
+   "check": "generator_over_capacity",
+   "detail": "10238 L collected vs plausible max 2400 L from declared purchases",
+   "ref": "Grand Plaza Hotel 2026-09",
+   "severity": "high"
+  },
+  {
+   "check": "generator_over_capacity",
+   "detail": "1715 L collected vs plausible max 1500 L from declared purchases",
+   "ref": "Campus Canteen Services 2026-09",
+   "severity": "high"
+  },
+  {
+   "check": "generator_over_capacity",
+   "detail": "898 L collected vs plausible max 720 L from declared purchases",
+   "ref": "Highway Dhaba Cluster 2026-09",
+   "severity": "high"
+  },
+  {
+   "check": "mass_balance",
+   "detail": "processed 7096 kg > received 6170 kg",
+   "ref": "lot ULO-202609",
+   "severity": "high"
+  },
+  {
+   "check": "implausible_yield",
+   "detail": "99% yield outside (0.7, 0.95)",
+   "ref": "batch B-UCO-202609",
+   "severity": "high"
+  },
+  {
+   "check": "dispatch_exceeds_output",
+   "detail": "dispatched 5308 kg > produced 4825 kg",
+   "ref": "batch B-ULO-202609",
+   "severity": "high"
+  },
+  {
+   "check": "vehicle_not_in_nhwts",
+   "detail": "vehicle DL01-ZZ-9999 not registered in the hazardous-waste tracking system",
+   "ref": "shipment F10-BAD1",
+   "severity": "high"
+  },
+  {
+   "check": "vehicle_no_gps",
+   "detail": "vehicle DL01-ZZ-9999 not GPS-tracked (required for used-oil transport)",
+   "ref": "shipment F10-BAD1",
+   "severity": "high"
+  },
+  {
+   "check": "transit_variance",
+   "detail": "received 1700 kg vs dispatched 2000 kg (15.0% off)",
+   "ref": "shipment F10-BAD1",
+   "severity": "high"
+  },
+  {
+   "check": "ca1_has_storage",
+   "detail": "RoadRunner Used Oil is registered CA-1 (no storage) but holds storage",
+   "ref": "shipment F10-BAD2",
+   "severity": "high"
+  },
+  {
+   "check": "ca1_container_too_large",
+   "detail": "CA-1 container 1000 L > 200 L",
+   "ref": "shipment F10-BAD2",
+   "severity": "high"
+  },
+  {
+   "check": "ca1_out_of_radius",
+   "detail": "CA-1 haul 210 km exceeds even the 150 km no-recycler limit",
+   "ref": "shipment F10-BAD2",
+   "severity": "high"
+  }
+ ],
+ "/api/compliance/ledger": {
+  "entries": 91,
+  "head_hash": "9331f5d33338bd2ba8afcfc687302436d6f9e203cac148c64a34eff60e4f7755",
+  "intact": true,
+  "problems": []
+ },
+ "/api/dashboard/summary": {
+  "integrity_flags_high": 18,
+  "integrity_flags_total": 18,
+  "ledger_entries": 91,
+  "ledger_intact": true,
+  "output_tonnes_by_product": {
+   "base_oil": 20.9,
+   "biodiesel": 65.4
+  },
+  "uco_collected_tonnes": 73.9,
+  "ulo_collected_tonnes": 30.5
+ },
+ "/api/lots": [
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-09-28",
+   "id": 11,
+   "lot_code": "UCO-202609",
+   "material": "UCO",
+   "n_collections": 9,
+   "processed_kg": 20585.9,
+   "received_kg": 21222.6,
+   "unprocessed_kg": 636.7
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": false,
+   "formed_on": "2026-09-28",
+   "id": 12,
+   "lot_code": "ULO-202609",
+   "material": "ULO",
+   "n_collections": 4,
+   "processed_kg": 7095.9,
+   "received_kg": 6170.4,
+   "unprocessed_kg": -925.5
+  },
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-08-28",
+   "id": 9,
+   "lot_code": "UCO-202608",
+   "material": "UCO",
+   "n_collections": 5,
+   "processed_kg": 10429.5,
+   "received_kg": 10752.0,
+   "unprocessed_kg": 322.5
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": true,
+   "formed_on": "2026-08-28",
+   "id": 10,
+   "lot_code": "ULO-202608",
+   "material": "ULO",
+   "n_collections": 3,
+   "processed_kg": 4683.4,
+   "received_kg": 4828.2,
+   "unprocessed_kg": 144.9
+  },
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-07-28",
+   "id": 7,
+   "lot_code": "UCO-202607",
+   "material": "UCO",
+   "n_collections": 5,
+   "processed_kg": 11398.6,
+   "received_kg": 11751.2,
+   "unprocessed_kg": 352.6
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": true,
+   "formed_on": "2026-07-28",
+   "id": 8,
+   "lot_code": "ULO-202607",
+   "material": "ULO",
+   "n_collections": 3,
+   "processed_kg": 5309.3,
+   "received_kg": 5473.5,
+   "unprocessed_kg": 164.2
+  },
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-06-28",
+   "id": 5,
+   "lot_code": "UCO-202606",
+   "material": "UCO",
+   "n_collections": 5,
+   "processed_kg": 11811.8,
+   "received_kg": 12177.1,
+   "unprocessed_kg": 365.3
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": true,
+   "formed_on": "2026-06-28",
+   "id": 6,
+   "lot_code": "ULO-202606",
+   "material": "ULO",
+   "n_collections": 3,
+   "processed_kg": 4782.7,
+   "received_kg": 4930.6,
+   "unprocessed_kg": 147.9
+  },
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-05-28",
+   "id": 3,
+   "lot_code": "UCO-202605",
+   "material": "UCO",
+   "n_collections": 5,
+   "processed_kg": 9938.7,
+   "received_kg": 10246.0,
+   "unprocessed_kg": 307.3
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": true,
+   "formed_on": "2026-05-28",
+   "id": 4,
+   "lot_code": "ULO-202605",
+   "material": "ULO",
+   "n_collections": 3,
+   "processed_kg": 4225.9,
+   "received_kg": 4356.6,
+   "unprocessed_kg": 130.7
+  },
+  {
+   "aggregator": "Bharat Oil Aggregators",
+   "balanced": true,
+   "formed_on": "2026-04-28",
+   "id": 1,
+   "lot_code": "UCO-202604",
+   "material": "UCO",
+   "n_collections": 5,
+   "processed_kg": 7545.2,
+   "received_kg": 7778.6,
+   "unprocessed_kg": 233.4
+  },
+  {
+   "aggregator": "Enviro ULO Aggregation",
+   "balanced": true,
+   "formed_on": "2026-04-28",
+   "id": 2,
+   "lot_code": "ULO-202604",
+   "material": "ULO",
+   "n_collections": 3,
+   "processed_kg": 4631.6,
+   "received_kg": 4774.9,
+   "unprocessed_kg": 143.2
+  }
+ ]
+}
