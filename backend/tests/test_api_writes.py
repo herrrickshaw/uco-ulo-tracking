@@ -295,3 +295,13 @@ def test_seeding_is_idempotent(fresh):
         seed_if_empty(s)
         s.commit()
         assert (s.query(Generator).count(), s.query(Collection).count()) == (n_gen, n_col) and n_gen == 8
+
+
+def test_availability_check_tolerates_a_billionth_of_a_tonne(fresh, monkeypatch):
+    from app.routers import compliance
+    monkeypatch.setattr(compliance, "_certs_generated", lambda db, rid, fy=None: 1.0)
+    monkeypatch.setattr(compliance, "_certs_sold", lambda db, rid, fy=None: 0.0)
+    exact_edge = purchase(fresh, tonnes=1.0 + 1e-9)
+    assert "Recycler has only" not in exact_edge.text                           # tonnes == available + 1e-9 is not 'more than available'
+    beyond = purchase(fresh, tonnes=1.0 + 2e-9)
+    assert beyond.status_code == 400 and "Recycler has only" in beyond.json()["detail"]
